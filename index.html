@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#39172f">
+  <meta name="description" content="A preview of the LKC PsychSIG Human Library — six stories, one open for a glimpse.">
+  <title>Human Library — PsychSIG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --plum: #39172f;
+      --plum-deep: #2c1025;
+      --book: #451a37;
+      --pink: #e436a1;
+      --paper: #fff3f7;
+      --ink: #39172f;
+      --muted: #d5b8cb;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+      font-family: 'Inter Tight', 'Inter Display', 'Arial Narrow', Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-width: 280px; background: #1f0c1b; }
+    body { margin: 0; min-width: 280px; color: #fff; -webkit-font-smoothing: antialiased; background:#1f0c1b; }
+    button { font: inherit; -webkit-tap-highlight-color: transparent; }
+    button:focus-visible { outline: 2px solid #f7cdec; outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .app {
+      position: relative; isolation: isolate; width: 100%; max-width: 500px; height: 100vh; height: 100dvh;
+      min-height: 430px; margin: 0 auto; overflow: hidden;
+      background: radial-gradient(ellipse 85% 45% at 50% 66%, #4c1d3d 0%, transparent 90%), #39172f;
+      box-shadow: 0 0 80px #0003;
+    }
+    .app::before { content:''; position:absolute; inset:0; pointer-events:none; opacity:.25; background: radial-gradient(circle at 90% 4%, #82346255, transparent 34%); z-index:-1; }
+    .catalogue { height:100%; position:relative; display:flex; flex-direction:column; align-items:center; }
+    .catalogue-masthead { flex:none; width:100%; padding:calc(env(safe-area-inset-top) + 25px) 26px 0; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+    .brand { font-size:10px; font-weight:800; letter-spacing:-.02em; color:#ebd7e6; }
+    .catalogue-count { font-size:11px; font-weight:600; letter-spacing:.12em; color:#dfc1d6; font-variant-numeric:tabular-nums; }
+    .gallery { flex:1; min-height:0; width:100%; display:grid; place-items:center; position:relative; }
+    .carousel { position:relative; width:100%; height:min(69dvh, 610px); min-height:220px; perspective:1300px; touch-action:pan-y; overflow:visible; }
+    .carousel::after { content:''; position:absolute; left:18%; right:18%; bottom:6%; height:18px; background:#170719a3; border-radius:100%; filter:blur(19px); pointer-events:none; }
+    .book-tile {
+      --offset:0; --scale:1; --alpha:1; --bright:1;
+      position:absolute; top:50%; left:50%; width:min(77vw, 345px, 45dvh); aspect-ratio: .705;
+      border:0; background:none; color:inherit; padding:0; cursor:pointer;
+      transform:translate(-50%, -50%) translateX(calc(var(--offset) * min(64vw, 282px, 39dvh))) scale(var(--scale));
+      opacity:var(--alpha); filter:brightness(var(--bright)); z-index:var(--z,2);
+      transition:transform 600ms var(--ease), opacity 480ms ease, filter 480ms ease;
+      will-change:transform;
+    }
+    .book-tile[data-away='true'] { pointer-events:none; }
+    .book-tile[aria-current='true'] .book-cover-style { box-shadow:9px 21px 36px #180715a6, inset 7px 0 10px #1405168c, inset -1px 0 2px #ffffff1f; }
+    .book-cover-style {
+      position:relative; overflow:hidden; width:100%; height:100%;
+      display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+      border-radius:5px 9px 10px 5px; border:1px solid #a56f9861;
+      background:linear-gradient(116deg, #331029 0%, #4b1c3b 17%, #481a37 76%, #37132a 100%);
+      box-shadow:8px 19px 30px #1609158c, inset 7px 0 11px #1405168c, inset -1px 0 3px #ffffff23;
+      padding: 9% 7% 9% 9%; text-align:left;
+    }
+    .book-cover-style::before { content:''; position:absolute; top:0; bottom:0; left:3.5%; width:1px; background:#e1a4cc26; box-shadow:2px 0 5px #0006; }
+    .book-cover-style::after { content:''; position:absolute; top:0; bottom:0; right:0; width:4px; background:#e7beda0e; }
+    .cover-type { max-width:100%; margin:0; color:var(--pink); font-size:clamp(55px, 16vw, 78px); line-height:.93; font-weight:900; letter-spacing:-.085em; }
+    .cover-caption { margin:13px 0 0; color:#f9eaf4; font-size:clamp(16px, 4.5vw, 23px); letter-spacing:-.05em; line-height:1.16; font-weight:500; }
+    .locked .book-cover-style { background:linear-gradient(127deg,#65445e,#5b3a55 52%,#4b2e47); border-color:#ba9aaf4a; align-items:center; text-align:center; padding:16px; }
+    .locked:nth-of-type(3n) .book-cover-style { background:linear-gradient(127deg,#735375,#5a405f 53%,#482d4d); }
+    .lock-icon { width:29px; height:29px; color:#f0dce9; opacity:.93; }
+    .lock-label { margin:16px 0 0; font-size:clamp(13px,3.7vw,17px); line-height:1.18; letter-spacing:-.035em; color:#fff0fa; font-weight:600; }
+    .lock-foot { position:absolute; bottom:7%; font-size:10px; letter-spacing:.16em; font-weight:700; color:#efd6e8a8; }
+    .catalogue-footer { width:100%; flex:none; padding:0 22px calc(env(safe-area-inset-bottom) + 23px); display:flex; flex-direction:column; align-items:center; gap:19px; }
+    .dots { display:flex; justify-content:center; align-items:center; gap:11px; min-height:12px; }
+    .dot { width:7px; height:7px; border-radius:99px; padding:0; border:1px solid #cda5be; background:transparent; cursor:pointer; transition:background .2s ease, width .3s ease; }
+    .dot[aria-current='true'] { width:22px; background:#f4d6ea; border-color:#f4d6ea; }
+    .instruction { display:flex; align-items:center; justify-content:center; gap:11px; text-transform:uppercase; letter-spacing:.14em; font-size:10px; font-weight:650; color:#d8bdd0; min-height:22px; user-select:none; }
+    .instruction svg { width:17px; height:17px; stroke:currentColor; }
+    .catalogue-footnote { font-size:10px; color:#b88ca8; letter-spacing:.02em; line-height:1.2; text-align:center; }
+
+    /* Overlay has exactly one book object throughout. The real first page is already behind its cover. */
+    .detail { position:absolute; inset:0; z-index:12; background:radial-gradient(ellipse 85% 45% at 50% 65%,#4c1d3d,transparent 90%),#39172f; display:flex; flex-direction:column; align-items:center; }
+    .detail.entering { animation:detailReveal .5s ease both; }
+    @keyframes detailReveal { from {background-color:#39172f00} to {background-color:#39172f} }
+    .detail.entering .volume-shell { visibility:hidden; }
+    .detail-head { flex:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top) + 17px) 22px 0; min-height:52px; }
+    .back { display:grid; place-items:center; width:42px; height:42px; padding:0; color:#fff6fd; border:0; background:none; cursor:pointer; border-radius:50%; }
+    .back svg { width:24px; height:24px; }
+    .detail-head .head-small { font-size:11px; color:#d6b7cb; letter-spacing:.12em; font-variant-numeric: tabular-nums; }
+    .detail-stage { flex:1; min-height:0; width:100%; display:grid; place-items:center; perspective:1200px; touch-action:pan-y; cursor:grab; position:relative; }
+    .detail-stage:active { cursor:grabbing; }
+    .volume-shell { position:relative; height:auto; width:min(90vw, 390px, 46dvh); aspect-ratio:.705; isolation:isolate; transform-style:preserve-3d; filter:drop-shadow(9px 18px 20px #18061599); }
+    .page-edges { position:absolute; inset:5px -5px 3px 5px; border-radius:4px 9px 10px 4px; background:repeating-linear-gradient(to bottom,#e6d1d9 0px,#e6d1d9 2px,#fcf1f4 3px,#f6e6ec 4px); border:1px solid #d6bfcb; }
+    .paper { position:absolute; inset:0; padding:clamp(23px,6.9vw,36px); display:flex; flex-direction:column; overflow:hidden; backface-visibility:hidden; border-radius:5px 11px 11px 5px; background:linear-gradient(110deg,#efdae4 0%,#fff5f8 11%,#fff7f9 86%,#efdae4 100%); color:var(--ink); border:1px solid #e1c7d3; box-shadow:inset 7px 0 12px #8e5f8733,4px 7px 13px #1e0b1b4a; }
+    .paper::before { content:''; position:absolute; top:0; bottom:0; left:10px; width:1px; background:#ad82972e; }
+    .paper-two { z-index:1; }
+    .paper-one { z-index:3; transform-origin:3% center; transform-style:preserve-3d; transition:transform 800ms cubic-bezier(.32,.05,.25,1), opacity .2s ease .58s; }
+    .detail[data-step='2'] .paper-one { transform:perspective(1300px) rotateY(-165deg); opacity:0; pointer-events:none; }
+    .cover-leaf { position:absolute; inset:0; z-index:5; transform-origin:3% center; transform-style:preserve-3d; transition:transform 900ms cubic-bezier(.32,.05,.25,1), opacity .2s ease .63s; }
+    .cover-front { position:absolute; inset:0; backface-visibility:hidden; }
+    .cover-inside { position:absolute; inset:0; border-radius:8px; background:linear-gradient(130deg,#ead2df,#f9e9f0); transform:rotateY(180deg); backface-visibility:hidden; }
+    .detail[data-step='1'] .cover-leaf, .detail[data-step='2'] .cover-leaf { transform:perspective(1300px) rotateY(-165deg); opacity:0; pointer-events:none; }
+    .page-kicker { font-size:9px; line-height:1.25; font-weight:800; color:#a27794; letter-spacing:.12em; text-transform:uppercase; }
+    .paper-content { flex:1; min-height:0; display:flex; justify-content:center; flex-direction:column; }
+    .paper-title { margin:0; font-weight:900; letter-spacing:-.09em; line-height:.99; color:#d52c91; font-size:clamp(36px,10.5vw,54px); }
+    .paper-subtitle { font-size:clamp(17px,4.75vw,23px); font-weight:750; letter-spacing:-.06em; line-height:1.05; margin:7px 0 0; }
+    .rule { margin:18px 0 21px; width:30px; height:2px; background:#44213a; }
+    .paper-copy { font-size:clamp(13px,3.7vw,16px); line-height:1.47; letter-spacing:-.025em; margin:0; font-weight:500; }
+    .paper-copy + .paper-copy { margin-top:14px; }
+    .page-footer { font-size:9px; line-height:1.25; color:#997589; }
+    .paper-two .paper-title { font-size:clamp(33px,9.7vw,51px); }
+    .paper-two .paper-copy { font-size:clamp(14px,3.85vw,17px); }
+    .reader-finish { margin-top:23px; padding:13px 14px; border-radius:9px; background:#edd0e5; font-size:clamp(12px,3.5vw,15px); line-height:1.24; font-weight:800; letter-spacing:-.03em; }
+    .detail-bottom { flex:none; width:100%; padding:3px 23px calc(21px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:15px; }
+    .step-dots { display:flex; align-items:center; justify-content:center; gap:8px; min-height:11px; }
+    .step-dots span { height:5px; width:5px; background:#d9bdd066; border-radius:9px; transition:width .22s ease, background .22s ease; }
+    .step-dots span.active { width:20px; background:#efcae2; }
+    .swipe-prompt { display:flex; align-items:center; gap:11px; text-transform:uppercase; font-size:11px; font-weight:650; letter-spacing:.1em; color:#f0d7e7; min-height:28px; }
+    .swipe-prompt svg { width:20px; height:20px; animation:hintMotion 2.1s ease-in-out infinite; }
+    @keyframes hintMotion { 0%,100% { transform:translateX(4px); opacity:.6 } 48% { transform:translateX(-5px); opacity:1 } }
+    .detail-note { color:#be96b0; font-size:10px; line-height:1.2; text-align:center; }
+    .toast { position:absolute; z-index:20; left:50%; bottom:calc(env(safe-area-inset-bottom) + 91px); width:max-content; max-width:calc(100% - 38px); transform:translate(-50%,15px); opacity:0; pointer-events:none; transition:opacity .22s ease,transform .25s var(--ease); padding:14px 17px; border-radius:14px; background:#f7e9f2; color:#39172f; box-shadow:0 15px 35px #1a091798; font-size:13px; font-weight:700; text-align:center; line-height:1.4; }
+    .toast.visible { transform:translate(-50%,0); opacity:1; }
+    .transition-ghost { position:fixed; z-index:99; pointer-events:none; will-change:left,top,width,height; }
+    .transition-ghost .book-cover-style { height:100%; width:100%; }
+
+    @media (min-width:550px) {
+      .app { margin:22px auto; height: min(900px, calc(100dvh - 44px)); border-radius:24px; }
+      .book-tile { width:min(315px, 45dvh); }
+      .volume-shell { width:min(372px, 46dvh); }
+      .cover-type { font-size:69px; }
+    }
+    @media (max-height:650px) {
+      .catalogue-masthead { padding-top:calc(env(safe-area-inset-top) + 12px); }
+      .catalogue-footer { gap:11px; padding-bottom:calc(env(safe-area-inset-bottom) + 13px); }
+      .gallery .carousel { height:69dvh; }
+      .detail-head { padding-top:calc(env(safe-area-inset-top) + 8px); }
+      .detail-bottom { gap:9px; padding-bottom:calc(env(safe-area-inset-bottom) + 10px); }
+      .volume-shell { width:min(88vw, 45dvh); }
+      .rule { margin:12px 0; }
+      .paper-copy + .paper-copy { margin-top:9px; }
+      .reader-finish { margin-top:12px; }
+    }
+    @media (max-width:335px) {
+      .book-tile { width:min(77vw, 44dvh); }
+      .cover-type { font-size:clamp(52px,16vw,58px); }
+      .cover-caption { font-size:15px; }
+      .paper { padding:19px 20px; }
+      .paper-title { font-size:33px; }
+      .paper-subtitle { font-size:17px; }
+      .paper-copy { font-size:12px; }
+      .paper-two .paper-copy { font-size:12.5px; line-height:1.35; }
+      .paper-two .page-footer { display:none; }
+      .paper-two .reader-finish { padding:10px 12px; font-size:12px; }
+      .rule { margin:12px 0 13px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    }
+  </style>
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+</head>
+<body>
+  <main class="app" id="app">
+    <section class="catalogue" id="catalogue" aria-label="Human Library book collection">
+      <div class="catalogue-masthead">
+        <span class="brand">LKC PSYCHSIG</span>
+        <span class="catalogue-count" id="catalogue-count">01 / 06</span>
+      </div>
+      <div class="gallery">
+        <div class="carousel" id="carousel" role="group" aria-roledescription="carousel" aria-label="Swipe through six books. One preview is unlocked."></div>
+      </div>
+      <div class="catalogue-footer">
+        <div class="dots" id="dots" aria-label="Select a book"></div>
+        <div class="instruction" id="catalogue-prompt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M16 5 9 12l7 7M8 12h13"/></svg>
+          <span>Swipe to explore</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="m8 5 7 7-7 7M16 12H3"/></svg>
+        </div>
+        <div class="catalogue-footnote">ONE PREVIEW · FIVE STORIES TO DISCOVER</div>
+      </div>
+    </section>
+
+    <section class="detail" id="detail" data-step="0" aria-label="Anxiety book preview" hidden>
+      <div class="detail-head">
+        <button type="button" class="back" id="back" aria-label="Back to collection">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="head-small" id="detail-count">COVER / 02</span>
+      </div>
+      <div class="detail-stage" id="detail-stage" role="group" aria-label="Swipe left to open and turn the pages of Anxiety">
+        <div class="volume-shell" id="volume-shell">
+          <div class="page-edges" aria-hidden="true"></div>
+          <article class="paper paper-two" aria-label="Preview page two">
+            <div class="page-kicker">A HUMAN LIBRARY PREVIEW</div>
+            <div class="paper-content">
+              <h2 class="paper-title">Beyond<br>the label.</h2>
+              <div class="rule"></div>
+              <p class="paper-copy">There is more to anxiety than what others can see.</p>
+              <p class="paper-copy">Sometimes, understanding begins with a conversation — and the willingness to listen.</p>
+              <div class="reader-finish">Come hear the story in person.</div>
+            </div>
+            <div class="page-footer">DEMO COPY · NOT A SHARER'S QUOTE</div>
+          </article>
+          <article class="paper paper-one" aria-label="Preview page one">
+            <div class="page-kicker">A HUMAN LIBRARY PREVIEW</div>
+            <div class="paper-content">
+              <h2 class="paper-title">Anxiety</h2>
+              <p class="paper-subtitle">How it feels like</p>
+              <div class="rule"></div>
+              <p class="paper-copy">Anxiety can feel like an alarm that keeps ringing, even when nothing seems wrong.</p>
+              <p class="paper-copy">Thoughts race. The body stays tense. Ordinary moments can suddenly take enormous energy.</p>
+            </div>
+            <div class="page-footer">DEMO COPY · NOT A SHARER'S QUOTE</div>
+          </article>
+          <div class="cover-leaf" id="cover-leaf" aria-label="Anxiety book cover">
+            <div class="cover-front book-cover-style" id="main-cover-face">
+              <h2 class="cover-type">Anxiety</h2><p class="cover-caption">How it feels like</p>
+            </div>
+            <div class="cover-inside" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-bottom">
+        <div class="step-dots" id="step-dots" aria-hidden="true"><span class="active"></span><span></span><span></span></div>
+        <div class="swipe-prompt" aria-live="polite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4m7 7-7-7 7-7"/></svg>
+          <span id="step-instruction">Swipe left to open</span>
+        </div>
+        <div class="detail-note" id="detail-note">Swipe right to go back · Tap page edges also works</div>
+      </div>
+    </section>
+    <div class="toast" id="locked-toast" role="status" aria-live="polite">🔒 This story opens at the event.</div>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const total = 6;
+      const lockIcon = `<svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`;
+      let selected = 0;
+      let step = 0;
+      let detailOpen = false;
+      let transitioning = false;
+      let ignoreClicksUntil = 0;
+      let toastTimer;
+      let tg = null;
+      const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function readyTelegram() {
+        tg = window.Telegram?.WebApp || null;
+        try {
+          tg?.ready(); tg?.expand();
+          tg?.setBackgroundColor?.('#39172f'); tg?.setHeaderColor?.('#39172f');
+          tg?.BackButton?.onClick(closeBook);
+          tg?.BackButton?.hide();
+        } catch (_) {}
+      }
+      if (document.readyState === 'complete') readyTelegram();
+      else window.addEventListener('load', readyTelegram, {once:true});
+      function haptic() { try { tg?.HapticFeedback?.selectionChanged?.(); } catch (_) {} }
+      function currentTile() { return $('carousel').children[0].querySelector('.book-cover-style'); }
+      function showToast() {
+        const toast=$('locked-toast'); toast.classList.add('visible');
+        clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('visible'),2700);
+        haptic();
+      }
+      for (let i=0;i<total;i++) {
+        const tile=document.createElement('button'); tile.type='button';
+        tile.className=`book-tile ${i===0 ? 'unlocked' : 'locked'}`;
+        tile.dataset.index=String(i);
+        tile.setAttribute('aria-label', i===0 ? 'Anxiety, How it feels like. Preview available.' : `Story ${i+1}, locked until the event.`);
+        tile.innerHTML=i===0
+          ? `<div class="book-cover-style"><h2 class="cover-type">Anxiety</h2><p class="cover-caption">How it feels like</p></div>`
+          : `<div class="book-cover-style">${lockIcon}<div class="lock-label">Discover<br>at the event</div><div class="lock-foot">STORY ${String(i+1).padStart(2,'0')}</div></div>`;
+        tile.addEventListener('click', () => {
+          if (Date.now()<ignoreClicksUntil || transitioning || detailOpen) return;
+          if (i!==selected) { selected=i; renderCarousel(); haptic(); return; }
+          if (i===0) openBook(); else showToast();
+        });
+        $('carousel').appendChild(tile);
+        const dot=document.createElement('button'); dot.type='button'; dot.className='dot';
+        dot.setAttribute('aria-label',`Show story ${i+1}`);
+        dot.addEventListener('click',()=> { selected=i; renderCarousel(); haptic(); });
+        $('dots').appendChild(dot);
+      }
+      function renderCarousel() {
+        clearTimeout(toastTimer); $('locked-toast').classList.remove('visible');
+        for (let i=0;i<total;i++) {
+          const tile=$('carousel').children[i];
+          let d=i-selected;
+          if(d>3) d-=total;
+          if(d < -3) d+=total;
+          const far=Math.abs(d)>1;
+          tile.style.setProperty('--offset',d);
+          tile.style.setProperty('--scale',d===0?1:.81);
+          tile.style.setProperty('--alpha',far?0:d===0?1:.62);
+          tile.style.setProperty('--bright',d===0?1:.85);
+          tile.style.setProperty('--z',d===0?6:3-Math.abs(d));
+          tile.dataset.away=String(far);
+          tile.tabIndex=far?-1:0;
+          tile.setAttribute('aria-hidden',String(far));
+          tile.setAttribute('aria-current',String(i===selected));
+          $('dots').children[i].setAttribute('aria-current',String(i===selected));
+        }
+        $('catalogue-count').textContent=`${String(selected+1).padStart(2,'0')} / 06`;
+      }
+      function move(delta) { if(detailOpen || transitioning)return; selected=(selected+delta+total)%total; renderCarousel(); haptic(); }
+      let catPointer=null;
+      $('carousel').addEventListener('pointerdown', e=>{ catPointer={x:e.clientX,y:e.clientY}; });
+      $('carousel').addEventListener('pointerup',e=>{
+        if(!catPointer)return;
+        const dx=e.clientX-catPointer.x, dy=e.clientY-catPointer.y;
+        if(Math.abs(dx)>36 && Math.abs(dx)>Math.abs(dy)*1.12) {
+          ignoreClicksUntil=Date.now()+75;
+          move(dx<0?1:-1);
+        }
+        catPointer=null;
+      });
+      $('carousel').addEventListener('pointercancel',()=>catPointer=null);
+      let wheelCooldown=false;
+      $('carousel').addEventListener('wheel',e=>{
+        if(Math.abs(e.deltaX)<18 || Math.abs(e.deltaX)<Math.abs(e.deltaY))return;
+        e.preventDefault(); if(wheelCooldown)return;
+        move(e.deltaX>0?1:-1); wheelCooldown=true; setTimeout(()=>wheelCooldown=false,500);
+      },{passive:false});
+
+      async function animateCover(source,target) {
+        if(reducedMotion())return;
+        const a=source.getBoundingClientRect(), b=target.getBoundingClientRect();
+        if(!a.width||!b.width)return;
+        const ghost=document.createElement('div'); ghost.className='transition-ghost';
+        ghost.style.cssText=`left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;`;
+        ghost.appendChild(source.cloneNode(true));
+        document.body.appendChild(ghost);
+        try {
+          await ghost.animate([
+            {left:`${a.left}px`,top:`${a.top}px`,width:`${a.width}px`,height:`${a.height}px`,opacity:1},
+            {left:`${b.left}px`,top:`${b.top}px`,width:`${b.width}px`,height:`${b.height}px`,opacity:1}
+          ],{duration:520,easing:'cubic-bezier(.22, 1, .36, 1)',fill:'forwards'}).finished;
+        } catch (_) {} finally { ghost.remove(); }
+      }
+      async function openBook() {
+        if(transitioning || detailOpen)return;
+        clearTimeout(toastTimer); $('locked-toast').classList.remove('visible');
+        transitioning=true; detailOpen=true; step=0;
+        const source=currentTile();
+        const detail=$('detail'); detail.hidden=false; detail.dataset.step='0'; detail.classList.add('entering');
+        setStepUI();
+        await animateCover(source,$('main-cover-face'));
+        detail.classList.remove('entering');
+        transitioning=false; haptic();
+        try{tg?.BackButton?.show();}catch(_){}
+      }
+      async function closeBook() {
+        if(!detailOpen || transitioning)return;
+        transitioning=true;
+        const detail=$('detail');
+        detail.classList.add('entering');
+        // The front cover is reset before the reverse expansion begins, so no intermediate placeholder ever appears.
+        detail.dataset.step='0';step=0;setStepUI();
+        await new Promise(r=>setTimeout(r,reducedMotion()?0:65));
+        await animateCover($('main-cover-face'),currentTile());
+        detail.hidden=true;detail.classList.remove('entering');
+        detailOpen=false;transitioning=false;
+        try{tg?.BackButton?.hide();}catch(_){}
+      }
+      function setStepUI() {
+        $('detail').dataset.step=String(step);
+        $('detail-count').textContent=step===0?'COVER / 02':`${String(step).padStart(2,'0')} / 02`;
+        $('step-instruction').textContent=step===0?'Swipe left to open':step===1?'Swipe left to turn page':'Swipe right to turn back';
+        $('detail-note').textContent=step===2?'You’ll hear the rest at the Human Library':'Swipe right to go back · Tap page edges also works';
+        [...$('step-dots').children].forEach((el,i)=>el.classList.toggle('active',i===step));
+        const arrow=$('detail').querySelector('.swipe-prompt svg');
+        arrow.style.transform=step===2?'rotate(180deg)':'';
+        arrow.style.animation=step===2?'none':'';
+      }
+      function turn(delta) {
+        if(!detailOpen||transitioning)return;
+        const target=Math.max(0,Math.min(2,step+delta));
+        if(target===step) { if(step===0 && delta<0)closeBook(); return; }
+        step=target;setStepUI();haptic();
+      }
+      let readerPointer=null;
+      $('detail-stage').addEventListener('pointerdown',e=>{ readerPointer={x:e.clientX,y:e.clientY}; });
+      $('detail-stage').addEventListener('pointerup',e=>{
+        if(!readerPointer)return;
+        const dx=e.clientX-readerPointer.x,dy=e.clientY-readerPointer.y;
+        if(Math.abs(dx)>38 && Math.abs(dx)>Math.abs(dy)*1.05) turn(dx<0?1:-1);
+        else if(Math.abs(dx)<9 && Math.abs(dy)<9) {
+          const rect=$('volume-shell').getBoundingClientRect();
+          if(e.clientX>rect.left+rect.width*.62)turn(1);
+          else if(e.clientX<rect.left+rect.width*.25)turn(-1);
+        }
+        readerPointer=null;
+      });
+      $('detail-stage').addEventListener('pointercancel',()=>readerPointer=null);
+      $('back').addEventListener('click',closeBook);
+      document.addEventListener('keydown',e=>{
+        if(e.key==='Escape'||e.key==='Backspace') { if(detailOpen){ e.preventDefault();closeBook(); } }
+        else if(e.key==='ArrowLeft') { e.preventDefault(); if(detailOpen) turn(-1);else move(-1); }
+        else if(e.key==='ArrowRight') { e.preventDefault(); if(detailOpen) turn(1);else move(1); }
+        else if(e.key==='Enter' && !detailOpen && selected===0 && document.activeElement===document.body)openBook();
+      });
+      renderCarousel();
+    })();
+  </script>
+</body>
+</html>
